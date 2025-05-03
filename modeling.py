@@ -1,0 +1,95 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier as KNN
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+df = pd.read_csv("data/cleaned_listings.csv")
+
+features = [
+'latitude', 'longitude', 'minimum_nights', 'number_of_reviews',
+'reviews_per_month', 'calculated_host_listings_count', 'availability_365', 
+    'number_of_reviews_ltm', 'neighbourhood_group_Brooklyn', 'neighbourhood_group_Manhattan',
+    'neighbourhood_group_Queens', 'neighbourhood_group_Staten Island', 'neighbourhood_Arden Heights',
+    'neighbourhood_Arrochar', 'neighbourhood_Arverne', 'neighbourhood_Astoria', 'neighbourhood_Bath Beach',
+    'neighbourhood_Battery Park City', 'neighbourhood_Bay Ridge', 'neighbourhood_Bay Terrace', 
+    'neighbourhood_Bay Terrace, Staten Island', 'neighbourhood_Baychester', 'neighbourhood_Bayside', 
+    'neighbourhood_Bayswater', 'neighbourhood_Bedford-Stuyvesant', 'neighbourhood_Belle Harbor', 
+    'neighbourhood_Bellerose', 'neighbourhood_Belmont', 'neighbourhood_Bensonhurst', 'neighbourhood_Bergen Beach', 
+    'neighbourhood_Boerum Hill', 'neighbourhood_Borough Park', 'neighbourhood_Breezy Point', 'neighbourhood_Briarwood', 
+    'neighbourhood_Brighton Beach', 'neighbourhood_Bronxdale', 'neighbourhood_Brooklyn Heights', 'neighbourhood_Brownsville',
+    'neighbourhood_Bull\'s Head', 'neighbourhood_Bushwick', 'neighbourhood_Cambria Heights', 'neighbourhood_Canarsie',
+    'neighbourhood_Carroll Gardens', 'neighbourhood_Castle Hill', 'neighbourhood_Castleton Corners', 'neighbourhood_Chelsea',
+    'neighbourhood_Chelsea, Staten Island', 'neighbourhood_Chinatown', 'neighbourhood_City Island', 'neighbourhood_Civic Center',
+    'neighbourhood_Claremont Village', 'neighbourhood_Clason Point', 'neighbourhood_Clifton', 'neighbourhood_Clinton Hill',
+    'neighbourhood_Co-op City', 'neighbourhood_Cobble Hill', 'neighbourhood_College Point', 'neighbourhood_Columbia St',
+    'neighbourhood_Concord', 'neighbourhood_Concourse', 'neighbourhood_Concourse Village', 'neighbourhood_Coney Island',
+    'neighbourhood_Corona', 'neighbourhood_Country Club', 'neighbourhood_Crown Heights', 'neighbourhood_Cypress Hills',
+    'neighbourhood_DUMBO', 'neighbourhood_Ditmars Steinway', 'neighbourhood_Dongan Hills', 'neighbourhood_Douglaston',
+    'neighbourhood_Downtown Brooklyn', 'neighbourhood_Dyker Heights', 'neighbourhood_East Elmhurst', 'neighbourhood_East Flatbush',
+    'neighbourhood_East Harlem', 'neighbourhood_East Morrisania', 'neighbourhood_East New York', 'neighbourhood_East Village',
+    'neighbourhood_Eastchester', 'neighbourhood_Edenwald', 'neighbourhood_Edgemere', 'neighbourhood_Elmhurst', 'neighbourhood_Eltingville',
+    'neighbourhood_Emerson Hill', 'neighbourhood_Far Rockaway', 'neighbourhood_Fieldston', 'neighbourhood_Financial District',
+    'neighbourhood_Flatbush', 'neighbourhood_Flatiron District', 'neighbourhood_Flatlands', 'neighbourhood_Flushing', 
+    'neighbourhood_Fordham', 'neighbourhood_Forest Hills', 'neighbourhood_Fort Greene', 'neighbourhood_Fort Hamilton',
+    'neighbourhood_Fort Wadsworth', 'neighbourhood_Fresh Meadows', 'neighbourhood_Gerritsen Beach', 'neighbourhood_Glendale',
+    'neighbourhood_Gowanus', 'neighbourhood_Gramercy', 'neighbourhood_Graniteville', 'neighbourhood_Grant City', 
+    'neighbourhood_Gravesend', 'neighbourhood_Great Kills', 'neighbourhood_Greenpoint', 'neighbourhood_Greenwich Village', 
+    'neighbourhood_Grymes Hill', 'neighbourhood_Harlem', 'neighbourhood_Hell\'s Kitchen', 'neighbourhood_Highbridge',
+    'neighbourhood_Hollis', 'neighbourhood_Holliswood', 'neighbourhood_Howard Beach', 'neighbourhood_Howland Hook',
+    'neighbourhood_Huguenot', 'neighbourhood_Hunts Point', 'neighbourhood_Inwood', 'neighbourhood_Jackson Heights', 
+    'neighbourhood_Jamaica', 'neighbourhood_Jamaica Estates', 'neighbourhood_Jamaica Hills', 'neighbourhood_Kensington',
+    'neighbourhood_Kew Gardens', 'neighbourhood_Kew Gardens Hills', 'neighbourhood_Kingsbridge', 'neighbourhood_Kips Bay',
+    'neighbourhood_Laurelton', 'neighbourhood_Lighthouse Hill', 'neighbourhood_Little Italy', 'neighbourhood_Little Neck',
+    'neighbourhood_Long Island City', 'neighbourhood_Longwood', 'neighbourhood_Lower East Side', 'neighbourhood_Manhattan Beach',
+    'neighbourhood_Marble Hill', 'neighbourhood_Mariners Harbor', 'neighbourhood_Maspeth', 'neighbourhood_Melrose',
+    'neighbourhood_Middle Village', 'neighbourhood_Midland Beach', 'neighbourhood_Midtown', 'neighbourhood_Midwood',
+    'neighbourhood_Mill Basin', 'neighbourhood_Morningside Heights', 'neighbourhood_Morris Heights', 'neighbourhood_Morris Park',
+    'neighbourhood_Morrisania', 'neighbourhood_Mott Haven', 'neighbourhood_Mount Eden', 'neighbourhood_Mount Hope',
+    'neighbourhood_Murray Hill', 'neighbourhood_Navy Yard', 'neighbourhood_Neponsit', 'neighbourhood_New Brighton',
+    'neighbourhood_New Dorp', 'neighbourhood_New Dorp Beach', 'neighbourhood_New Springville', 'neighbourhood_NoHo',
+    'neighbourhood_Nolita', 'neighbourhood_North Riverdale', 'neighbourhood_Norwood', 'neighbourhood_Oakwood',
+    'neighbourhood_Olinville', 'neighbourhood_Ozone Park', 'neighbourhood_Park Slope', 'neighbourhood_Parkchester',
+    'neighbourhood_Pelham Bay', 'neighbourhood_Pelham Gardens', 'neighbourhood_Port Morris', 'neighbourhood_Port Richmond',
+    'neighbourhood_Prince\'s Bay', 'neighbourhood_Prospect Heights', 'neighbourhood_Prospect-Lefferts Gardens',
+    'neighbourhood_Queens Village', 'neighbourhood_Randall Manor', 'neighbourhood_Red Hook', 'neighbourhood_Rego Park',
+    'neighbourhood_Richmond Hill', 'neighbourhood_Richmondtown', 'neighbourhood_Ridgewood', 'neighbourhood_Riverdale',
+    'neighbourhood_Rockaway Beach', 'neighbourhood_Roosevelt Island', 'neighbourhood_Rosebank', 'neighbourhood_Rosedale',
+    'neighbourhood_Schuylerville', 'neighbourhood_Sea Gate', 'neighbourhood_Sheepshead Bay', 'neighbourhood_Shore Acres',
+    'neighbourhood_Silver Lake', 'neighbourhood_SoHo', 'neighbourhood_Soundview', 'neighbourhood_South Beach',
+    'neighbourhood_South Ozone Park', 'neighbourhood_South Slope', 'neighbourhood_Springfield Gardens', 'neighbourhood_Spuyten Duyvil',
+    'neighbourhood_St. Albans', 'neighbourhood_St. George', 'neighbourhood_Stapleton', 'neighbourhood_Stuyvesant Town',
+    'neighbourhood_Sunnyside', 'neighbourhood_Sunset Park', 'neighbourhood_Theater District', 'neighbourhood_Throgs Neck',
+    'neighbourhood_Todt Hill', 'neighbourhood_Tompkinsville', 'neighbourhood_Tottenville', 'neighbourhood_Tremont',
+    'neighbourhood_Tribeca', 'neighbourhood_Two Bridges', 'neighbourhood_Unionport', 'neighbourhood_University Heights',
+    'neighbourhood_Upper East Side', 'neighbourhood_Upper West Side', 'neighbourhood_Van Nest', 'neighbourhood_Vinegar Hill',
+    'neighbourhood_Wakefield', 'neighbourhood_Washington Heights', 'neighbourhood_West Brighton', 'neighbourhood_West Farms',
+    'neighbourhood_West Village', 'neighbourhood_Westchester Square', 'neighbourhood_Westerleigh', 'neighbourhood_Whitestone',
+    'neighbourhood_Williamsbridge', 'neighbourhood_Williamsburg', 'neighbourhood_Willowbrook', 'neighbourhood_Windsor Terrace',
+    'neighbourhood_Woodhaven', 'neighbourhood_Woodlawn', 'neighbourhood_Woodrow', 'neighbourhood_Woodside',
+    'room_type_Hotel room', 'room_type_Private room', 'room_type_Shared room', 'price_category'
+]
+
+
+
+X = df[features]
+y = df['price_category']  
+
+print("Class distribution in full dataset:")
+print(pd.Series(y).value_counts())
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42)
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+model = KNN(n_neighbors=5)
+model.fit(X_train_scaled, y_train)
+y_pred = model.predict(X_test_scaled)
+
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
+

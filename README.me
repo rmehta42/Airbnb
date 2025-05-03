@@ -1,0 +1,12 @@
+This project uses Airbnb listing(https://insideairbnb.com/new-york-city/) data to predict the price category of listings based on features such as location, room type, number of reviews, and availability. 
+The dataset includes variables like latitude, longitude, price, minimum_nights, number_of_reviews, reviews_per_month, and availability_365.
+Irrelevant columns were removed, and missing values were handled appropriately, such as filling missing reviews_per_month with 0 and using the mean of price within each neighbourhood_group and room_type for missing price values.
+Outliers and listings with zero availability were filtered out, and categorical variables were one-hot encoded. 
+Price categories were defined using custom bins, and the target variable price_category was created for classification.
+
+
+A classification model was trained to predict the price_category of listings.
+ The model achieved an accuracy of 86.73%. The confusion matrix shows strong performance for mid-range price categories, particularly category 2 (1,463 correct predictions) and category 3 (1,350 correct).
+  However, there is overlap between adjacent categories, such as 154 listings from category 3 being misclassified as category 2.
+   Predictions for category 4 (highest price) had a high precision of 96% but a lower recall of 67%, indicating that many high-priced listings were misclassified as category 3. 
+   These results suggest the model is generally effective, especially for low-to-mid price ranges, but could benefit from refinement to better capture the upper end of the market.
